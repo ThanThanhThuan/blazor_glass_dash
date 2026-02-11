@@ -1,0 +1,45 @@
+﻿name: Deploy Blazor WASM
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-to-github-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # 1. Inject Secrets into appsettings.json
+      - name: App Settings Variable Substitution
+        uses: microsoft/variable-substitution@v1
+        with:
+          files: './wwwroot/appsettings.production.json'
+        env:
+          VITE_TABLE_NAME: ${{ secrets.VITE_TABLE_NAME }}
+          VITE_INSTANCE_ID: ${{ secrets.VITE_INSTANCE_ID }}
+          VITE_API_TOKEN: ${{ secrets.VITE_API_TOKEN }}
+
+      # 2. Setup .NET
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x' # Or '9.0.x' depending on your project
+
+      # 3. Publish Project
+      - name: Publish .NET Core Project
+        run: dotnet publish -c Release -o release
+
+      # 4. Fix for GitHub Pages (The .nojekyll file)
+      # This stops GitHub from ignoring the _framework folder
+      - name: Add .nojekyll file
+        run: touch release/wwwroot/.nojekyll
+
+      # 5. Deploy to gh-pages branch
+      - name: Commit to GitHub Pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: release/wwwroot
+          branch: gh-pages

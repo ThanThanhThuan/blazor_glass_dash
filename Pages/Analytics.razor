@@ -1,0 +1,205 @@
+﻿@page "/analytics"
+@using BlazorDashboard.Components
+@using BlazorDashboard.Services
+@using BlazorDashboard.Models
+@inject DataService Data
+
+<Navbar Title="Analytics Overview" />
+
+<!-- Breadcrumbs -->
+<div class="page-header" style="margin-top: -20px; margin-bottom: 30px;">
+    <div class="page-breadcrumb">
+        <a href="/">Dashboard</a>
+        <span>/</span>
+        <span>Analytics</span>
+    </div>
+</div>
+
+<!-- 1. Analytics Metrics Grid -->
+<section class="stats-grid">
+    @if (Data.AnalyticsStats != null)
+    {
+        @foreach (var stat in Data.AnalyticsStats)
+        {
+            <GlassCard Is3d="true">
+                <div class="stat-card-inner">
+                    <div class="stat-info">
+                        <h3>@stat.Label</h3>
+                        <div class="stat-value">@stat.Value</div>
+                        <span class="stat-change @stat.ChangeType">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                @if (stat.ChangeType == "positive")
+                                {
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                }
+                                else
+                                {
+                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                                }
+                            </svg>
+                            @stat.Change
+                        </span>
+                    </div>
+                    <div class="stat-icon @stat.IconColor">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @((MarkupString)stat.IconPath)
+                        </svg>
+                    </div>
+                </div>
+            </GlassCard>
+        }
+    }
+</section>
+
+<!-- 2. Traffic Chart & Top Pages -->
+<section class="content-grid">
+    <!-- Main Traffic Chart (30 Days) -->
+    <GlassCard class="chart-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">Traffic Overview</h2>
+                <p class="card-subtitle">Daily unique visitors (Last 30 Days)</p>
+            </div>
+            <div class="card-actions">
+                <button class="card-btn active">30 Days</button>
+            </div>
+        </div>
+        <div class="chart-wrapper">
+            <div class="chart-container">
+                <div class="chart-y-axis">
+                    <span class="y-value">50K</span>
+                    <span class="y-value">25K</span>
+                    <span class="y-value">0</span>
+                </div>
+                <div class="chart-placeholder">
+                    @foreach (var bar in Data.TrafficChartData)
+                    {
+                        <div class="chart-bar-group">
+                            <div class="chart-bar @bar.ColorClass" style="height: @bar.Height"></div>
+                            <span class="chart-label">@bar.Label</span>
+                        </div>
+                    }
+                </div>
+            </div>
+        </div>
+    </GlassCard>
+
+    <!-- Top Pages Activity Card -->
+    <GlassCard class="activity-card">
+        <div class="card-header">
+            <h2 class="card-title">Top Performing Pages</h2>
+        </div>
+        <div class="activity-list">
+            @foreach (var mpage in Data.TopPages)
+            {
+                <div class="activity-item">
+                    <div class="activity-avatar" style="background: var(--@mpage.Color)">
+                        @mpage.Rank
+                    </div>
+                    <div class="activity-content">
+                        <p class="activity-text"><strong>@mpage.Path</strong></p>
+                        <span class="activity-time">@mpage.Views</span>
+                    </div>
+                </div>
+            }
+        </div>
+    </GlassCard>
+</section>
+
+<!-- 3. Bottom Analysis Grid -->
+<section class="bottom-grid">
+    <!-- Devices Donut Chart -->
+    <GlassCard>
+        <div class="card-header">
+            <h2 class="card-title">Device Breakdown</h2>
+        </div>
+        <div class="donut-container">
+            <div class="donut-chart">
+                <svg width="140" height="140" viewBox="0 0 140 140">
+                    <circle class="donut-bg" cx="70" cy="70" r="54" />
+                    <!-- Mobile (55%) -->
+                    <circle class="donut-segment" cx="70" cy="70" r="54" stroke="var(--emerald-light)" stroke-dasharray="186.6 339.3" stroke-dashoffset="0" />
+                    <!-- Desktop (35%) -->
+                    <circle class="donut-segment" cx="70" cy="70" r="54" stroke="var(--gold)" stroke-dasharray="118.8 339.3" stroke-dashoffset="-186.6" />
+                    <!-- Tablet (10%) -->
+                    <circle class="donut-segment" cx="70" cy="70" r="54" stroke="var(--coral)" stroke-dasharray="33.9 339.3" stroke-dashoffset="-305.4" />
+                </svg>
+                <div class="donut-center">
+                    <div class="donut-value">100%</div>
+                    <div class="donut-label">Total</div>
+                </div>
+            </div>
+            <div class="donut-legend">
+                <div class="legend-item"><span class="legend-color cyan"></span><span>Mobile (55%)</span></div>
+                <div class="legend-item"><span class="legend-color magenta"></span><span>Desktop (35%)</span></div>
+                <div class="legend-item"><span class="legend-color purple"></span><span>Tablet (10%)</span></div>
+            </div>
+        </div>
+    </GlassCard>
+
+    <!-- Browser Performance -->
+    <GlassCard class="progress-card">
+        <div class="card-header"><h2 class="card-title">Browsers</h2></div>
+        @foreach (var browser in Data.BrowserStats)
+        {
+            <div class="progress-item">
+                <div class="progress-header">
+                    <span class="progress-label">@browser.Label</span>
+                    <span class="progress-value">@browser.Value%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill @browser.Color" style="width: @(browser.Value)%"></div>
+                </div>
+            </div>
+        }
+    </GlassCard>
+
+    <!-- Geographic Performance -->
+    <GlassCard class="progress-card">
+        <div class="card-header"><h2 class="card-title">Top Countries</h2></div>
+        @foreach (var country in Data.CountryStats)
+        {
+            <div class="progress-item">
+                <div class="progress-header">
+                    <span class="progress-label">@country.Label</span>
+                    <span class="progress-value">@country.Value%</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill @country.Color" style="width: @(country.Value)%"></div>
+                </div>
+            </div>
+        }
+    </GlassCard>
+</section>
+
+<style>
+    /* Ensure icon colors work with MarkupString icons */
+    .stat-icon.cyan svg { color: var(--emerald-light); }
+    .stat-icon.magenta svg { color: var(--gold); }
+    .stat-icon.purple svg { color: var(--coral); }
+    .stat-icon.success svg { color: var(--success); }
+    
+    .stat-icon svg {
+        width: 28px;
+        height: 28px;
+        display: block;
+    }
+
+    /* Breadcrumb Styling */
+    .page-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .page-breadcrumb a {
+        color: var(--text-secondary);
+        text-decoration: none;
+    }
+    .page-breadcrumb a:hover { color: var(--emerald-light); }
+</style>
+
+@code {
+    // Analytics specific logic can go here
+}

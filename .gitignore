@@ -1,0 +1,33 @@
+## .NET Core / Visual Studio
+[Bb]in/
+[Oo]bj/
+[Rr]elease/
+[Pp]ublish/
+.vs/
+.vscode/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+
+## Tooling
+.tools/
+.deploy/
+_ReSharper*/
+*.dotCover
+
+## OS files
+.DS_Store
+Thumbs.db
+
+## Blazor/JavaScript
+node_modules/
+.npm/
+
+## SECRETS & CONFIG (Crucial)
+# Ignore local appsettings that contain your real API keys
+wwwroot/appsettings.json
+wwwroot/appsettings.Development.json
+
+# If you want to keep a template on GitHub, 
+# you should create an 'appsettings.Example.json' and NOT ignore it.

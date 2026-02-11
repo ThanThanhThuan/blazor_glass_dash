@@ -1,0 +1,106 @@
+﻿@page "/admin-billing"
+@using BlazorDashboard.Services
+@using BlazorDashboard.Models
+@inject DataService Data
+@inject IJSRuntime JS
+
+<Navbar Title="Billing Admin (CRUD)" />
+
+<div class="main-container">
+    <!-- Form Section (Same as before) -->
+    <GlassCard style="max-width: 600px; margin: 0 auto 40px;">
+        <div class="card-header">
+            <h2 class="card-title">@(isEditing ? "Edit Record" : "Add DB Record")</h2>
+            @if (isEditing) { <button class="card-btn" @onclick="CancelEdit">Cancel</button> }
+        </div>
+        <EditForm Model="formModel" OnValidSubmit="HandleSubmit">
+            <div class="form-grid">
+                <div class="form-group-settings full-width">
+                    <label>Description</label>
+                    <InputText @bind-Value="formModel.Desc" class="form-input" required />
+                </div>
+                <div class="form-group-settings">
+                    <label>Amount</label>
+                    <InputNumber @bind-Value="formModel.Amount" class="form-input" required />
+                </div>
+                <div class="form-group-settings">
+                    <label>Status</label>
+                    <InputSelect @bind-Value="formModel.Status" class="settings-select" style="width:100%">
+                        <option value="paid">Paid</option>
+                        <option value="pending">Pending</option>
+                    </InputSelect>
+                </div>
+            </div>
+            <div class="btn-group" style="margin-top:20px">
+                <button type="submit" class="btn btn-primary">@(isEditing ? "Update" : "Save to DB")</button>
+            </div>
+        </EditForm>
+    </GlassCard>
+
+    <!-- Table Section: ONLY SHOW DATABASE RECORDS -->
+    <GlassCard>
+        <div class="card-header">
+            <h2 class="card-title">Manage Database Records</h2>
+            <p class="card-subtitle">Mocks are hidden from this management view</p>
+        </div>
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @* FILTER: Only show items where ID is not a Mock ID (doesn't start with 'm') *@
+                    @foreach (var item in Data.BillingHistory.Where(x => !x.Id.ToString().StartsWith("m")))
+                    {
+                        <tr>
+                            <td>@item.Date</td>
+                            <td>@item.Desc</td>
+                            <td>$@item.Amount.ToString("N2")</td>
+                            <td><span class="status-badge @item.Status.ToLower()">@item.Status</span></td>
+                            <td>
+                                <button class="card-btn" @onclick="() => StartEdit(item)">Edit</button>
+                                <button class="card-btn" style="color:var(--coral)" @onclick="() => DoDelete(item.Id)">Del</button>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </GlassCard>
+</div>
+
+@code {
+    private BillingRecord formModel = new() { Status = "paid" };
+    private bool isEditing = false;
+
+    protected override async Task OnInitializedAsync() => await Data.FetchBillingHistory();
+
+    private void StartEdit(BillingRecord item) {
+        isEditing = true;
+        formModel = new BillingRecord { Id = item.Id, Desc = item.Desc, Amount = item.Amount, Status = item.Status };
+    }
+
+    private void CancelEdit() { isEditing = false; formModel = new() { Status = "paid" }; }
+
+    private async Task DoDelete(object id) {
+        if (await JS.InvokeAsync<bool>("confirm", "Delete permanently?")) {
+            await Data.DeleteBilling(id);
+            await Data.FetchBillingHistory();
+        }
+    }
+
+    private async Task HandleSubmit() {
+        formModel.Date = DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss");
+        bool ok = isEditing ? await Data.UpdateBilling(formModel.Id, formModel) : await Data.CreateBilling(formModel);
+        if (ok) {
+            CancelEdit();
+            await Data.FetchBillingHistory();
+        }
+    }
+}

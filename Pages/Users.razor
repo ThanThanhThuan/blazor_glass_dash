@@ -1,0 +1,166 @@
+﻿@page "/users"
+@using BlazorDashboard.Components
+@using BlazorDashboard.Services
+@using BlazorDashboard.Models
+@inject DataService Data
+
+<Navbar Title="Users Management" />
+
+<!-- Breadcrumbs -->
+<div class="page-header" style="margin-top: -20px; margin-bottom: 30px;">
+    <div class="page-breadcrumb">
+        <a href="/">Dashboard</a>
+        <span>/</span>
+        <span>Users</span>
+    </div>
+</div>
+
+<!-- 1. User Metrics Grid -->
+<section class="stats-grid">
+    @if (Data.UserStats != null)
+    {
+        @foreach (var stat in Data.UserStats)
+        {
+            <GlassCard Is3d="true">
+                <div class="stat-card-inner">
+                    <div class="stat-info">
+                        <h3>@stat.Label</h3>
+                        <div class="stat-value">@stat.Value</div>
+                        <span class="stat-change @stat.ChangeType">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                @if (stat.ChangeType == "positive")
+                                {
+                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18" />
+                                }
+                                else
+                                {
+                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6" />
+                                }
+                            </svg>
+                            @stat.Change
+                        </span>
+                    </div>
+                    <div class="stat-icon @stat.IconColor">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            @((MarkupString)stat.IconPath)
+                        </svg>
+                    </div>
+                </div>
+            </GlassCard>
+        }
+    }
+</section>
+
+<!-- 2. Users Main Table -->
+<section class="content-grid" style="grid-template-columns: 1fr;">
+    <GlassCard class="table-card">
+        <div class="card-header">
+            <div>
+                <h2 class="card-title">All Users</h2>
+                <p class="card-subtitle">Manage user roles, permissions, and status</p>
+            </div>
+            <div class="card-actions">
+                <button class="card-btn">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin-right: 6px;">
+                        <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+                    </svg>
+                    Add User
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th>Last Active</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Data.UsersList != null)
+                    {
+                        @foreach (var user in Data.UsersList)
+                        {
+                            <tr>
+                                <td>
+                                    <div class="table-user">
+                                        <div class="table-avatar" style="background: @user.Gradient">
+                                            @user.Initials
+                                        </div>
+                                        <div class="table-user-info">
+                                            <span class="table-user-name">@user.Name</span>
+                                            <span class="table-user-email">@user.Email</span>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>@user.Role</td>
+                                <td>
+                                    <span class="status-badge @user.Status">
+                                        @user.StatusText
+                                    </span>
+                                </td>
+                                <td>@user.Joined</td>
+                                <td>@user.Active</td>
+                                <td>
+                                    <div style="display: flex; gap: 8px;">
+                                        <button class="card-btn" style="padding: 6px 12px;">Edit</button>
+                                        <button class="card-btn" style="padding: 6px 12px; color: var(--coral);">
+                                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                                <polyline points="3 6 5 6 21 6"></polyline>
+                                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+    </GlassCard>
+</section>
+
+<style>
+    /* Icon consistency for v-html icons */
+    .stat-icon svg {
+        width: 28px;
+        height: 28px;
+        display: block;
+    }
+    .stat-icon.cyan svg { color: var(--emerald-light); }
+    .stat-icon.magenta svg { color: var(--gold); }
+    .stat-icon.purple svg { color: var(--coral); }
+    .stat-icon.success svg { color: var(--success); }
+
+    /* Breadcrumb Styling */
+    .page-breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 13px;
+        color: var(--text-muted);
+    }
+    .page-breadcrumb a {
+        color: var(--text-secondary);
+        text-decoration: none;
+    }
+    .page-breadcrumb a:hover { color: var(--emerald-light); }
+
+    /* Table Specifics */
+    .table-user-name {
+        display: block;
+        font-weight: 500;
+        color: var(--text-primary);
+    }
+    .table-user-email {
+        display: block;
+        font-size: 12px;
+        color: var(--text-muted);
+    }
+</style>

@@ -1,0 +1,30 @@
+﻿@inject IJSRuntime JS
+
+<div @ref="cardRef"
+     @attributes="AdditionalAttributes"
+     class="glass-card @(Is3d ? "glass-card-3d" : "") @CustomClass">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public bool Is3d { get; set; }
+
+    // 1. Capture all unmatched attributes (like 'class') into a dictionary
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
+
+    // 2. Helper to extract the class string specifically so we can merge it
+    private string CustomClass =>
+        AdditionalAttributes != null && AdditionalAttributes.TryGetValue("class", out var c)
+        ? c.ToString()
+        : "";
+
+    private ElementReference cardRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && Is3d)
+            await JS.InvokeVoidAsync("applyTilt", cardRef);
+    }
+}
