@@ -16,6 +16,21 @@ public class DataService
     {
         _http = http;
         _config = config;
+        _http = http;
+    // Debugging: This will show in the F12 Console
+    var token = config["VITE_API_TOKEN"];
+    if (string.IsNullOrEmpty(token) || token.Contains("#") || token.Contains("SET_BY"))
+    {
+        Console.WriteLine("⚠️ CONFIG ERROR: API Token not found or is still a placeholder.");
+    }
+    else
+    {
+        Console.WriteLine("✅ CONFIG SUCCESS: API Token loaded.");
+    }
+
+    //_tableName = config["VITE_TABLE_NAME"] ?? "";
+    //_instanceId = config["VITE_INSTANCE_ID"] ?? "";
+    //_apiToken = config["VITE_API_TOKEN"] ?? "";
     }
   
     // --- 1. DASHBOARD CONSTANTS ---

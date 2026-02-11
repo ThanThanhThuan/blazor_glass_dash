@@ -1,4 +1,16 @@
-﻿# ... after checkout step ...
+﻿name: Deploy Blazor WASM
+on:
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: write
+
+jobs:
+  deploy-to-github-pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
