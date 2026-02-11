@@ -8,16 +8,12 @@
       - name: Publish Project
         run: dotnet publish -c Release -o release
 
-      # PERFORM SUBSTITUTION ON THE FINAL PUBLISHED FILE
-      - name: App Settings Variable Substitution
-        uses: microsoft/variable-substitution@v1
-        with:
-          # Target the file in the RELEASE folder, not the source folder
-          files: './release/wwwroot/appsettings.json'
-        env:
-          VITE_TABLE_NAME: ${{ secrets.VITE_TABLE_NAME }}
-          VITE_INSTANCE_ID: ${{ secrets.VITE_INSTANCE_ID }}
-          VITE_API_TOKEN: ${{ secrets.VITE_API_TOKEN }}
+      - name: Manual Variable Injection
+        run: |
+          sed -i 's|##TABLE_NAME##|${{ secrets.VITE_TABLE_NAME }}|g' release/wwwroot/appsettings.json
+          sed -i 's|##INSTANCE_ID##|${{ secrets.VITE_INSTANCE_ID }}|g' release/wwwroot/appsettings.json
+          sed -i 's|##API_TOKEN##|${{ secrets.VITE_API_TOKEN }}|g' release/wwwroot/appsettings.json
+        # This replaces the ##PLACEHOLDERS## with the actual secrets from GitHub
 
       - name: Add .nojekyll
         run: touch release/wwwroot/.nojekyll

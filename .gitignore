@@ -26,8 +26,8 @@ node_modules/
 
 ## SECRETS & CONFIG (Crucial)
 # Ignore local appsettings that contain your real API keys
-wwwroot/appsettings.json
-wwwroot/appsettings.Development.json
+# wwwroot/appsettings.json
+# wwwroot/appsettings.Development.json
 
 # If you want to keep a template on GitHub, 
 # you should create an 'appsettings.Example.json' and NOT ignore it.
