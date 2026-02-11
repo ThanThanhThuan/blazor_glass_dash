@@ -1,4 +1,4 @@
-## React Dashboard Interactive
+## Blazor Dashboard Interactive
 
 View live at: https://thanthanhthuan.github.io/blazor_glass_dash/
 
